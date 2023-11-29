@@ -1,0 +1,36 @@
+
+===============Timing Results for the SuiteSparse benchmark(Average of 1 runs)===============
+
+(a) Baseline Code : Serial code
+(b) Optimized Code : Cetus Parallel code (with the base technique applied)
+                   : Cetus Parallel code (with the new technique applied)
+
+--------------------------------------------------------------------------
+->Baseline execution time =11.617553 s (0.0 % variation)
+
+Execution time of code with the Technique of this paper =11.789169 s (0.0 % variation)
+->New Technique Speedup=0.9854429095044782
+
+
+-------------------------------------------------------------------------------
+->Baseline execution time =16.126774 s (0.0 % variation)
+
+Execution time of code with the Technique of this paper =16.213542 s (0.0 % variation)
+->New Technique Speedup=0.9946484241382914
+
+
+-------------------------------------------------------------------------------
+->Baseline execution time =63.51856 s (0.0 % variation)
+
+Execution time of code with the Technique of this paper =63.572361 s (0.0 % variation)
+->New Technique Speedup=0.9991537045477987
+
+
+-------------------------------------------------------------------------------
+->Baseline execution time =181.426651 s (0.0 % variation)
+
+Execution time of code with the Technique of this paper =178.927048 s (0.0 % variation)
+->New Technique Speedup=1.0139699560683524
+
+
+-------------------------------------------------------------------------------
