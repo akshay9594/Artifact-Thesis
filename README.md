@@ -1,34 +1,32 @@
 # Artifact Description for the Evaluation of Subscripted Subscript Analysis
 
-[![DOI](https://zenodo.org/badge/670291996.svg)](https://zenodo.org/doi/10.5281/zenodo.10213905)
-
-This README describes how to evaluate the artifact for the paper: 
-"Recurrence Analysis for Automatic Parallelization of Subscripted Subscripts" submitted to
-the ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming (PPoPP) 2024.
+This README describes how to evaluate the artifact for Chapter 3 of the thesis: 
+"Compile-time Automatic Parallelization of Subscripted Subscripts using Recurrence Analysis".
 
 ## What is reproduced?
 The Artifact reproduces major parts of the evaluation results of Experiment 1 and 
-Experiment 2 mentioned in Section 4 of the paper. More specifically, the following results are
+Experiment 2 mentioned in Section 3.9 of the thesis. More specifically, the following results are
 reproduced:
 
 ### For Experiment 1:
-The speedup graphs for benchmarks AMGmk, SDDMM and UA(transf) shown in Figure 14. The scripts
-produce one graph for each benchmark. The graphs plot the performance improvement of the
+The speedup graphs for benchmarks AMGmk, SDDMM, CHOLMOD Supernodal, UA(transf) shown in Figure 3.17. 
+The scripts produce one graph per benchmark. The graphs plot the performance improvement of the
 Cetus parallel codes (OpenMP parallelization) v/s the Serial baseline.
 
 Note: 
 - In the interest of time, for UA-NAS benchmark, CLASSES A, B, C are used.
-- The results in Figure 13 of the paper are NOT reproduced, but the source files are provided
+- The results in Figure 3.16 of the thesis are NOT reproduced, but the source files are provided
   within the *Cetus-Output-WithoutSubSub* subdirectories.
 - The scripts measure and plot the performance improvement for the maximum number of cores 
   available on the machine. The scripts cannot vary the number of available cores.
 
 ### For Experiment 2
 
-The speedup graph shown in Figure 17 of the paper. The graph compares the impact of two techniques -
-*Cetus+BaseAlgo* and *Cetus+NewAlgo* on the performance of 12 benchmarks listed in Table 1 of the
-paper. The table also shows the inputs used for each benchmark. We used MATRIX2, dielFilterV2clx and 
-CLASS A as input datasets for the AMGmk, SDDMM and UA applications in this experiment.
+The speedup graph shown in Figure 3.20 of the thesis. The graph compares the impact of the classical
+automatic parallelization and that of the New technique (*Cetus+NewAlgo*) on the performance 
+of 12 benchmarks listed in Table 3.1 of the thesis. The table also shows the inputs used for each benchmark. 
+We used MATRIX2, dielFilterV2clx, spal_004 and CLASS A as input datasets for the AMGmk, SDDMM, 
+CHOLMOD Supernodal and UA applications respectively in Experiment 2.
 
 Note:
   The scripts measure and plot the performance improvement for the maximum number of cores 
@@ -57,30 +55,14 @@ Note:
 
 ### Hardware
  - Machine with x86-64 processors (preferably Sky Lake and beyond)
- - ~2.5GB of disk space
+ - ~4GB of disk space
+ - Atleast 8GB of Memory
 
 ## Obtaining the Codes
-1. The codes can be obtained from the Zenodo repository using the DOI -
-   [![DOI](https://zenodo.org/badge/670291996.svg)](https://zenodo.org/doi/10.5281/zenodo.10213905)
-   
-   A zipped folder is downloaded.Unzip the folder and place it in the root directory of your system.
+The codes can be obtained from the Zenodo repository using the DOI -
 
-2. A docker image of the artifact is also available. 
+A zipped folder is downloaded.Unzip the folder and place it in the root directory of your system.
 
-   - The image is hosted at : 
-      
-      https://hub.docker.com/r/akshaybhosale9594/artifact-subsubanalysis/tags
-
-   - First start the docker engine on your system and then pull and run the
-     docker image using the following commands:
-
-   ```
-   docker pull akshaybhosale9594/artifact-subsubanalysis
-   ```
-   ```
-   docker run -t -i akshaybhosale9594/artifact-subsubanalysis:v1.0
-   ```
-   - Use the *master.py* script to execute the experiments using the instructions below.
 
 ## Code description
 - The source code files for each experiment are placed in the directories -- *Experiment_1*
@@ -92,15 +74,14 @@ Note:
   benchmark if the benchmark uses internally generated (within the code) inputs. 
   E.g. for amgmk, the source files are arranged into directories *MATRIX1* through *MATRIX5* 
   as these matrices are internally generated. 
-- In *Experiment_2*, the optimized source files are further arranged into the directories
-  *Base_Technique* (referring to the Base Algorithm of [5]) and *New_Technique* 
-  (referring to the New Algorithm presented in the paper).
+- In *Experiment_2*, the optimized source files are further arranged in the directory
+  *New_Technique* (referring to the New Algorithm presented in the thesis).
 
 ## Installing the dependencies
 
 ### Installing awk, bc and gfortran
 
-Following commands can be used to install awk, bc and gfortran:
+Following commands can be used to install awk, bc and gfortran using the apt package manager:
 
 ```
  sudo apt-get install -y gawk
@@ -114,7 +95,6 @@ using the python package manager : pip or pip3, using the command:
 ```
 pip install -r requirements.txt
 ```
-Note: The dependencies are pre-installed in the docker container.
 
 ## Compiling and Running the Codes
 
@@ -132,12 +112,7 @@ Each benchmark is run 3 times.
     ```
     python3 master.py
     ```
-  If using the docker image, use the command:
-
-    ```
-    python master.py
-    ```
-- The script compiles the benchmark files, executes the binary and records the measurements. 
+- The script compiles the benchmark files, executes the binaries and records the measurements. 
 
 ### Generated Results:
 
@@ -153,17 +128,12 @@ Each benchmark is run 3 times.
      within the *Exp-1* and *Exp-2* subdirectories.
    - *Exp-1* stores the graphs of Experiment 1 and *Exp-2* stores the graphs of Experiment 2.
 
-## Visualizing Graphs in Docker
-1. The most convenient way to access and visualize graphs from running
-    docker containers is to use the Docker extension within a code editor
-    such as Visual Studio Code (VSCode).
-2.  After installing the Docker extension in VSCode, use the Remote Ex-
-    plorer tab to establish a remote connection with the running container.
-3.  The artifact files will be listed under *files* > *root* > *artifact-subsubAnalysis*
      
 ## Translating an input code through the Cetus executable (Optional):
 
 - A Cetus executable has been provided which can be used to perform sanity checks, ensuring that
   Cetus with subscripted subscript analysis enabled, generates the expected optimized code.
 - The Cetus executable can be found in the directory *Cetus-bin*.
+- Instructions on how to use this executable can be found in this github repository - 
+  [The-Cetus-Project-SubSubAnalysis](https://github.com/akshay9594/The-Cetus-Project/tree/SubSub_Analysis)
 - Note that only Serial Baseline source codes can be translated.

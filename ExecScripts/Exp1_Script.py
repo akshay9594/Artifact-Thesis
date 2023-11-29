@@ -364,11 +364,11 @@ def run_exp_SDDMM(Exp1_directory,iters,path_to_reports_dir):
             input_path = input_directory + matrix + "/" + matrix + ".mtx"
             
             #Execute the Baseline code
-            app_time, app_time_var, threads = execute_Other_Benchmark(base_path,input_path,iters,executable)
+            app_time, app_time_var = execute_Other_Benchmark(base_path,input_path,iters,executable)
             #Write the execution times to the output file
             f.write("->Baseline execution time ="+ str(app_time)+" s " + "(" + str(app_time_var)+" % variation)" +"\n")
             #Execute the optimized code
-            opt_app_time, opt_time_var, threads = execute_Other_Benchmark(opt_code_path,input_path,iters,executable)
+            opt_app_time, opt_time_var = execute_Other_Benchmark(opt_code_path,input_path,iters,executable)
             #Writ the execution time to the output file
             f.write("->Optimized Code execution time ="+ str(opt_app_time)+" s " + "(" + str(opt_time_var)+" % variation)"+"\n")
             #Calculate the speedup
@@ -537,13 +537,11 @@ def run_benchmark(benchmark,Exp1_directory,root_directory,iters,path_to_reports_
 #Run the main experiment
 def RunExp(root_directory):
 
-    iters =  1
+    iters =  3
 
     Exp1_directory = root_directory + '/Experiment_1/'
 
-    #list_benchmarks = ['AMGmk','UA-NAS', 'SDDMM','SuiteSparse']
-
-    list_benchmarks = ['SuiteSparse']
+    list_benchmarks = ['AMGmk','UA-NAS', 'SDDMM','SuiteSparse']
 
     #Some plot parameters
     path_o_graphs_dir = root_directory + '/Graphs/Exp-1/'

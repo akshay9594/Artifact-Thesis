@@ -133,17 +133,7 @@ Returns TRUE if successful, or if the matrix is not positive definite.
 /* ---- inout --- */
 /* factorization */
 /* --------------- */
-int CHOLMOD(super_numeric)
-(
-    /* ---- input ---- */
-    cholmod_sparse *A,	/* matrix to factorize */
-    cholmod_sparse *F,	/* F = A' or A(:,f)' */
-    double beta [2],	/* beta*I is added to diagonal of matrix to factorize */
-    /* ---- in/out --- */
-    cholmod_factor *L,	/* factorization */
-    /* --------------- */
-    cholmod_common *Common
-)
+int CHOLMOD(super_numeric)(cholmod_sparse * A, cholmod_sparse * F, double beta[2], cholmod_factor * L, cholmod_common * Common)
 {
 	cholmod_dense * C;
 	int * Super, * Map, * SuperMap;
@@ -160,16 +150,6 @@ int CHOLMOD(super_numeric)
 	int j, p, pend, k1, k2, nscol, psi, psx, psend, nsrow, pj, d, kd1, kd2, info, ndcol, ndrow, pdi, pdx, pdend, pdi1, pdi2, pdx1, ndrow1, ndrow2, px, dancestor, sparent, dnext, nsrow2, ndrow3, pk, pf, pfend, Apacked, Fpacked, q, imap, repeat_supernode, nscol2, ss, tail, nscol_new = 0;
 	double fjk[2];
 	struct timeval start, end, begin, terminate, init, stop, st, ed;
-	int k_0;
-	int p_0;
-	int k_1;
-	int pf_0;
-	int p_1;
-	int k_2;
-	int i_0;
-	int p_2;
-	int ss_0;
-	int p_3;
 	if (Common==((void * )0))
 	{
 		return 0;
@@ -350,6 +330,8 @@ int CHOLMOD(super_numeric)
 	{
 		
 	}
+	printf("\n********************************************************\n");
+	printf("Threads : %d\n", 8);
 	/* ---------------------------------------------------------------------- */
 	/* get workspace */
 	/* ---------------------------------------------------------------------- */
@@ -369,20 +351,18 @@ int CHOLMOD(super_numeric)
 	/* find the mapping of nodes to relaxed supernodes */
 	/* ---------------------------------------------------------------------- */
 	/* SuperMap [k] = s if column k is contained in supernode s */
-	#pragma cetus private(k, k_0, s) 
+	#pragma cetus private(k, s) 
 	#pragma loop name cholmod_super_numeric#1 
 	for (s=0; s<nsuper; s ++ )
 	{
-		/* Normalized Loop */
-		#pragma cetus lastprivate(k_0) 
+		#pragma cetus private(k) 
 		#pragma loop name cholmod_super_numeric#1#0 
 		#pragma cetus parallel 
-		#pragma omp parallel for if((10000<((1L+(3L*Super[(1L+s)]))+(-3L*Super[s])))) lastprivate(k_0)
-		for (k_0=0; k_0<=((-1+Super[1+s])+(-1*Super[s])); k_0 ++ )
+		#pragma omp parallel for if((10000<((1L+(3L*Super[(1L+s)]))+(-3L*Super[s])))) private(k)
+		for (k=Super[s]; k<Super[s+1]; k ++ )
 		{
-			SuperMap[k_0+Super[s]]=s;
+			SuperMap[k]=s;
 		}
-		k=(k_0+Super[s]);
 	}
 	/* ---------------------------------------------------------------------- */
 	/* supernodal numerical factorization, using template routine */
@@ -493,7 +473,7 @@ int CHOLMOD(super_numeric)
 	/* ---------------------------------------------------------------------- */
 	/* supernodal numerical factorization */
 	/* ---------------------------------------------------------------------- */
-	#pragma cetus private(d, fjk, i, i_0, j, k, k_1, k_2, kd1, kd2, p, p_0, p_1, p_2, p_3, pdend, pdi, pdi1, pdi2, pdx, pdx1, pf, pf_0, pk, px, q, ss_0, tstart) 
+	#pragma cetus private(d, fjk, i, j, k, kd1, kd2, p, pdend, pdi, pdi1, pdi2, pdx, pdx1, pf, pk, px, q, ss, tstart) 
 	#pragma loop name cholmod_super_numeric#3 
 	/* #pragma cetus reduction(+: Common->cholmod_cpu_gemm_calls, Common->cholmod_cpu_gemm_time, Common->cholmod_cpu_potrf_calls, Common->cholmod_cpu_potrf_time, Common->cholmod_cpu_syrk_calls, Common->cholmod_cpu_syrk_time, Common->cholmod_cpu_trsm_calls, Common->cholmod_cpu_trsm_time)  */
 	for (s=0; s<nsuper; s ++ )
@@ -522,17 +502,15 @@ int CHOLMOD(super_numeric)
 		/* s is nsrow-by-nscol */
 		/* Case of no GPU, zero individual supernodes */
 		/* #pragma omp parallel for num_threads(CHOLMOD_OMP_NUM_THREADS)               schedule (static) if ( pend - psx > 1024 ) */
-		/* Normalized Loop */
-		#pragma cetus lastprivate(p_0) 
+		#pragma cetus private(p) 
 		#pragma loop name cholmod_super_numeric#3#0 
 		#pragma cetus parallel 
-		#pragma omp parallel for if((10000<((((1L+((-3L*k1)*psend))+((3L*k1)*psi))+((3L*k2)*psend))+((-3L*k2)*psi)))) lastprivate(p_0)
-		for (p_0=0; p_0<=((-1+pend)+(-1*psx)); p_0 ++ )
+		#pragma omp parallel for if((10000<((((1L+((-3L*k1)*psend))+((3L*k1)*psi))+((3L*k2)*psend))+((-3L*k2)*psi)))) private(p)
+		for (p=psx; p<pend; p ++ )
 		{
 			/* L_CLEAR (Lx,p); */
-			Lx[p_0+psx]=0;
+			Lx[p]=0;
 		}
-		p=(p_0+psx);
 		/* ------------------------------------------------------------------ */
 		/* construct the scattered Map for supernode s */
 		/* ------------------------------------------------------------------ */
@@ -555,64 +533,52 @@ int CHOLMOD(super_numeric)
 		/* stype = 0; */
 		gettimeofday(&start,NULL);
 		/* #pragma omp parallel for private ( p, pend, pfend, pf, i, j, imap, q )              num_threads(CHOLMOD_OMP_NUM_THREADS) if ( k2-k1 > 64 ) */
-		/* Normalized Loop */
-		#pragma cetus private(fjk, j, p, p_1, pf, pf_0) 
-		#pragma cetus lastprivate(k_1) 
+		#pragma cetus private(fjk, j, k, p, pf) 
 		#pragma loop name cholmod_super_numeric#3#2 
-		/* #pragma cetus reduction(+: Lx[((Map[Ai[(p_1+Ap[j])]]+psx)+(((k1+k_1)-k1)nsrow))])  */
-		#pragma cetus parallel 
-		#pragma omp parallel for private(fjk, j, p, p_1, pf, pf_0) lastprivate(k_1)
-		for (k_1=0; k_1<=((-1+(-1*k1))+k2); k_1 ++ )
+		/* #pragma cetus reduction(+: )  */
+		for (k=k1; k<k2; k ++ )
 		{
-			/* Normalized Loop */
-			#pragma cetus private(fjk, j, p, p_1) 
-			#pragma cetus lastprivate(pf_0) 
+			#pragma cetus private(fjk, j, p, pf) 
 			#pragma loop name cholmod_super_numeric#3#2#0 
-			/* #pragma cetus reduction(+: Lx[((Map[Ai[(p_1+Ap[j])]]+psx)+(((k1+k_1)-k1)nsrow))])  */
-			for (pf_0=0; pf_0<=((-1+Fp[(1+k1)+k_1])+(-1*Fp[k1+k_1])); pf_0 ++ )
+			/* #pragma cetus reduction(+: Lx[((Map[Ai[p]]+psx)+((k-k1)nsrow))])  */
+			for (pf=Fp[k]; pf<Fp[k+1]; pf ++ )
 			{
-				j=Fi[pf_0+Fp[k1+k_1]];
-				fjk[0]=Fx[pf_0+Fp[k1+k_1]];
-				/* Normalized Loop */
-				#pragma cetus lastprivate(p_1) 
+				j=Fi[pf];
+				fjk[0]=Fx[pf];
+				#pragma cetus private(p) 
 				#pragma loop name cholmod_super_numeric#3#2#0#0 
-				/* #pragma cetus reduction(+: Lx[((Map[Ai[(p_1+Ap[j])]]+psx)+(((k1+k_1)-k1)nsrow))])  */
-				for (p_1=0; p_1<=((-1+Ap[1+j])+(-1*Ap[j])); p_1 ++ )
+				/* #pragma cetus reduction(+: Lx[((Map[Ai[p]]+psx)+((k-k1)nsrow))])  */
+				for (p=Ap[j]; p<Ap[j+1]; p ++ )
 				{
-					if (Ai[p_1+Ap[j]]>=(k1+k_1))
+					if (Ai[p]>=k)
 					{
 						/* See the discussion of imap above. */
-						if ((Map[Ai[p_1+Ap[j]]]>=0)&&(Map[Ai[p_1+Ap[j]]]<nsrow))
+						if ((Map[Ai[p]]>=0)&&(Map[Ai[p]]<nsrow))
 						{
 							/* Lx [Map [i] + pk] += Ax [p] fjk ; */
-							Lx[(Map[Ai[p_1+Ap[j]]]+psx)+(((k1+k_1)-k1)*nsrow)]+=(Ax[p_1+Ap[j]]*fjk[0]);
+							Lx[(Map[Ai[p]]+psx)+((k-k1)*nsrow)]+=(Ax[p]*fjk[0]);
 						}
 					}
 				}
-				p=(p_1+Ap[j]);
 			}
-			pf=(pf_0+Fp[k1+k_1]);
 		}
-		k=(k1+k_1);
-		gettimeofday(&end, NULL);
-		sum += (end.tv_sec + (double)end.tv_usec/1000000) - (start.tv_sec + (double)start.tv_usec/1000000);      
+		 gettimeofday(&end, NULL);
+		 sum += (end.tv_sec + (double)end.tv_usec/1000000) - (start.tv_sec + (double)start.tv_usec/1000000);    
 		/* add beta to the diagonal of the supernode, if nonzero */
 		if (beta[0]!=0.0)
 		{
 			/* note that only the real part of beta is used */
 			pk=psx;
-			/* Normalized Loop */
-			#pragma cetus lastprivate(k_2) 
+			#pragma cetus private(k) 
 			#pragma loop name cholmod_super_numeric#3#3 
 			/* #pragma cetus reduction(+: Lx[pk])  */
-			for (k_2=0; k_2<=((-1+(-1*k1))+k2); k_2 ++ )
+			for (k=k1; k<k2; k ++ )
 			{
 				/* Lx [pk] += beta [0] ; */
 				Lx[pk]+=beta[0];
 				pk+=(nsrow+1);
 				/* advance to the next diagonal entry */
 			}
-			k=(k1+k_2);
 		}
 		/* ------------------------------------------------------------------ */
 		/* saverestore the list of supernodes */
@@ -725,7 +691,7 @@ int CHOLMOD(super_numeric)
 			ndrow3=(ndrow2-ndrow1);
 			/* number of rows of C2 */
 			;
-			gettimeofday(&st, NULL);
+			 gettimeofday(&st, NULL);
 			{
 				/* GPU not installed, or not used */
 				Common->cholmod_cpu_syrk_calls ++ ;
@@ -769,7 +735,7 @@ int CHOLMOD(super_numeric)
 					;
 					Common->cholmod_cpu_gemm_time+=(SuiteSparse_time()-tstart);
 				}
-				gettimeofday(&ed, NULL);
+				 gettimeofday(&ed, NULL);
 				sum3 += (ed.tv_sec + (double)ed.tv_usec/1000000) - (st.tv_sec + (double)st.tv_usec/1000000);
 				/* ---------------------------------------------------------- */
 				/* construct relative map to assemble d into s */
@@ -795,7 +761,7 @@ int CHOLMOD(super_numeric)
 				gettimeofday(&init, NULL);
 				/* #pragma omp parallel for private ( j, i, px, q )                                        num_threads(CHOLMOD_OMP_NUM_THREADS) */
 				/* cols k1:k2-1 */
-				#pragma cetus private(i, i_0, j, px, q) 
+				#pragma cetus private(i, j, px, q) 
 				#pragma loop name cholmod_super_numeric#3#8 
 				/* #pragma cetus reduction(+: )  */
 				for (j=0; j<ndrow1; j ++ )
@@ -803,20 +769,17 @@ int CHOLMOD(super_numeric)
 					/* printf("executed\n"); */
 					px=(psx+(RelativeMap[j]*nsrow));
 					/* rows k1:n-1 */
-					/* Normalized Loop */
-					#pragma cetus private(q) 
-					#pragma cetus lastprivate(i_0) 
+					#pragma cetus private(i, q) 
 					#pragma loop name cholmod_super_numeric#3#8#0 
 					/* #pragma cetus reduction(+: Lx[q])  */
-					for (i_0=0; i_0<=((-1+(-1*j))+ndrow2); i_0 ++ )
+					for (i=j; i<ndrow2; i ++ )
 					{
-						q=(px+RelativeMap[i_0+j]);
-						Lx[q]-=Cw[(i_0+j)+(ndrow2*j)];
+						q=(px+RelativeMap[i]);
+						Lx[q]-=Cw[i+(ndrow2*j)];
 					}
-					i=(i_0+j);
 				}
 				gettimeofday(&stop, NULL);
-				sum1 += (stop.tv_sec + (double)stop.tv_usec/1000000) - (init.tv_sec + (double)init.tv_usec/1000000); 
+				sum1 += (stop.tv_sec + (double)stop.tv_usec/1000000) - (init.tv_sec + (double)init.tv_usec/1000000);
 			}
 			/* -------------------------------------------------------------- */
 			/* prepare this supernode d for its next ancestor */
@@ -858,7 +821,7 @@ int CHOLMOD(super_numeric)
 		               
 		*/
 		nscol2=(repeat_supernode ? nscol_new : nscol);
-		gettimeofday(&begin, NULL);
+		 gettimeofday(&begin, NULL);
 		{
 			/* Note that the GPU will not be used for the triangular solve */
 			Common->cholmod_cpu_potrf_calls ++ ;
@@ -875,8 +838,8 @@ int CHOLMOD(super_numeric)
 			/* INFO */
 			Common->cholmod_cpu_potrf_time+=(SuiteSparse_time()-tstart);
 		}
-		gettimeofday(&terminate, NULL);
-		sum2 += (terminate.tv_sec + (double)terminate.tv_usec/1000000) - (begin.tv_sec + (double)begin.tv_usec/1000000);
+		 gettimeofday(&terminate, NULL); 
+		 sum2 += (terminate.tv_sec + (double)terminate.tv_usec/1000000) - (begin.tv_sec + (double)begin.tv_usec/1000000);
 		/* ------------------------------------------------------------------ */
 		/* check if the matrix is not positive definite */
 		/* ------------------------------------------------------------------ */
@@ -887,17 +850,15 @@ int CHOLMOD(super_numeric)
 			/* zero out the rest of this supernode */
 			pend=(psx+(nsrow*nscol));
 			/* s is nsrow-by-nscol */
-			/* Normalized Loop */
-			#pragma cetus lastprivate(p_2) 
+			#pragma cetus private(p) 
 			#pragma loop name cholmod_super_numeric#3#9 
 			#pragma cetus parallel 
-			#pragma omp parallel for if((10000<((1L+((3L*nscol)*nsrow))+((-3L*nscol_new)*nsrow)))) lastprivate(p_2)
-			for (p_2=0; p_2<=(((-1+pend)+(-1*psx))+((-1*nscol_new)*nsrow)); p_2 ++ )
+			#pragma omp parallel for if((10000<((1L+((3L*nscol)*nsrow))+((-3L*nscol_new)*nsrow)))) private(p)
+			for (p=(psx+(nsrow*nscol_new)); p<pend; p ++ )
 			{
 				/* Lx [p] = 0 ; */
-				Lx[(p_2+psx)+(nscol_new*nsrow)]=0;
+				Lx[p]=0;
 			}
-			p=((p_2+psx)+(nscol_new*nsrow));
 		}
 		/*
 		info is set to one in LAPACK_potrf if blas_ok is FALSE.  It is
@@ -920,29 +881,25 @@ int CHOLMOD(super_numeric)
 			*/
 			L->minor=((k1+info)-1);
 			/* clear the link lists of all subsequent supernodes */
-			/* Normalized Loop */
-			#pragma cetus lastprivate(ss_0) 
+			#pragma cetus private(ss) 
 			#pragma loop name cholmod_super_numeric#3#10 
 			#pragma cetus parallel 
-			#pragma omp parallel for if((10000<((-2L+(3L*nsuper))+(-3L*s)))) lastprivate(ss_0)
-			for (ss_0=0; ss_0<=((-2+nsuper)+(-1*s)); ss_0 ++ )
+			#pragma omp parallel for if((10000<((-2L+(3L*nsuper))+(-3L*s)))) private(ss)
+			for (ss=(s+1); ss<nsuper; ss ++ )
 			{
-				Head[(1+s)+ss_0]=( - 1);
+				Head[ss]=( - 1);
 			}
-			ss=((1+s)+ss_0);
 			/* zero this supernode, and all remaining supernodes */
 			pend=L->xsize;
-			/* Normalized Loop */
-			#pragma cetus lastprivate(p_3) 
+			#pragma cetus private(p) 
 			#pragma loop name cholmod_super_numeric#3#11 
 			#pragma cetus parallel 
-			#pragma omp parallel for if((10000<((1L+(3L*pend))+(-3L*psx)))) lastprivate(p_3)
-			for (p_3=0; p_3<=((-1+pend)+(-1*psx)); p_3 ++ )
+			#pragma omp parallel for if((10000<((1L+(3L*pend))+(-3L*psx)))) private(p)
+			for (p=psx; p<pend; p ++ )
 			{
 				/* Lx [p] = 0. ; */
-				Lx[p_3+psx]=0;
+				Lx[p]=0;
 			}
-			p=(p_3+psx);
 			/*
 			If L is indefinite, it still contains useful information.
 			 Supernodes 0 to s-1 are valid, similar to MATLAB [R,p]=chol(A),
@@ -1011,8 +968,8 @@ int CHOLMOD(super_numeric)
 				;
 				Common->cholmod_cpu_trsm_time+=(SuiteSparse_time()-tstart);
 			}
-			gettimeofday(&ed, NULL);
-			sum3 += (ed.tv_sec + (double)ed.tv_usec/1000000) - (st.tv_sec + (double)st.tv_usec/1000000);
+			 gettimeofday(&ed, NULL);
+			 sum3 += (ed.tv_sec + (double)ed.tv_usec/1000000) - (st.tv_sec + (double)st.tv_usec/1000000);      
 			;
 			if ( ! repeat_supernode)
 			{
@@ -1052,7 +1009,7 @@ int CHOLMOD(super_numeric)
 	printf("Time taken by 1st subsub loop = %lf s\n", sum);
 	printf("Time taken by 2nd subsub loop = %lf s\n", sum1);
 	printf("Time taken by lapack+BLAS routines = %lf s\n", sum2+sum3);
-	printf("Time taken by kernel= %lf s\n", ((sum+sum1)+sum2)+sum3);
+	printf("Total Computation time: %lf s\n", ((sum+sum1)+sum2)+sum3);
 	ok=0;
 	/* ---------------------------------------------------------------------- */
 	/* clear Common workspace, free temp workspace C, and return */

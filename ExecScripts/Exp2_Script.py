@@ -225,7 +225,7 @@ def run_poly_benchmark(Exp2_directory,benchmark,path_to_reports_dir):
 
         app_time,app_time_var = execute_poly(exec_script,serial_executable)
 
-        f.write("->Baseline execution time="+ str(app_time)+" s " + "(" + str(app_time_var)+" % variation)\n\n")
+        f.write("->Baseline execution time="+ str(app_time)+" s " + "(" + str(app_time_var)+" % variation)\n")
 
         NewOptCode_time, NewOptCode_var = execute_poly(exec_script,New_Opt_executable)
 
@@ -353,7 +353,7 @@ def run_Other_Benchmark(benchmark,Exp2_directory,iters,path_to_reports_dir,execu
        
         app_time, app_time_var = execute_Other_Benchmark(base_path,input_path,iters,executable)
 
-        f.write("->Baseline execution time ="+ str(app_time)+" s " + "(" + str(app_time_var)+" % variation)\n\n")
+        f.write("->Baseline execution time ="+ str(app_time)+" s " + "(" + str(app_time_var)+" % variation)\n")
             
 
         #Third, determine execution time and speedup of the Cetus parallel code with the New Technique of this paper applied
@@ -419,7 +419,7 @@ def run_SuiteSparse(benchmark,Exp2_directory,iters,path_to_reports_dir,executabl
         time_baseline,percent_var = Compile_And_Execute_CHOLMOD(base_path,Supernodal_path,Baseline_file_direc,  
                                                                 file,path_to_input,iters,executable)
 
-        f.write("->Baseline execution time ="+ str(time_baseline)+" s " + "(" + str(percent_var)+" % variation)\n\n")
+        f.write("->Baseline execution time ="+ str(time_baseline)+" s " + "(" + str(percent_var)+" % variation)\n")
 
         #Clean the object files
         os.chdir(base_path)
@@ -588,7 +588,7 @@ def RunExp(root_directory):
     
     #Plot the speedups. Graph saved in the Graphs/Exp-2 directory. 
 
-    plot_title = "Performance comparsion of the technique of [5] (Base Algo) and the New Technique (New Algo)"
+    plot_title = "Performance impact of the New Array Analysis algorithm"
 
     path_to_graphs_dir = root_directory + '/Graphs/Exp-2/'
 

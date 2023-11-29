@@ -23,12 +23,12 @@ def plot_data_Exp1(benchmark_name,plot_data_dict:dict, plot_title,xlabel,ylabel,
 def plot_data_Exp2(plot_data_dict:dict, plot_title,save_direc,xlabel,ylabel):
 
     benchmarks_list = list(plot_data_dict.keys())
-    NewTech_Speedups =plot_data_dict.items()
+    NewTech_Speedups = list(plot_data_dict.values())
   
     X_axis = np.arange(len(benchmarks_list)) 
   
     plt.figure().set_figwidth(17)
-    plt.bar(X_axis + 0.2, NewTech_Speedups, 0.4, label = 'Cetus+NewAlgo') 
+    plt.bar(X_axis, NewTech_Speedups, 0.4, label = 'Cetus+NewAlgo',align='center') 
   
     plt.xticks(X_axis, benchmarks_list) 
     plt.ylabel(ylabel) 

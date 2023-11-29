@@ -63,32 +63,26 @@ print("\n-----------------------------------------------------------------------
 
 print("(b)  Step 2:  Experiment selection and execution\n")
 
-print("\n\nRunning Experiment 1...")
-Exp1_Script.RunExp(root)
-print("\nExperiment finished! Results written to the Reports directory and Graphs to the Graphs directory!!")
-
-sys.exit()
-
 
 #Main code
 # Step 2: Select the Experiment to be executed
-val = input("\t1. Experiment 1 (Measures performance improvement for 3 benchmarks)\n\t" +
-            "2. Experiment 2 (Compares the performance impact of the Base technique and New technique)\n\t" +
+val = input("\t1. Experiment 1 (Measures performance improvement for 4 benchmarks)\n\t" +
+            "2. Experiment 2 (Quantifies the performance impact of the New technique)\n\t" +
             "3. Both Experiments\n\n\t-->Select the Experiment you want to run by entering the number: ")
 
 # Run the experiment
 if(val == '1'):
-    print("\n\nRunning Experiment 1...")
+    print("\nRunning Experiment 1...")
     Exp1_Script.RunExp(root)
     print("\nExperiment finished! Results written to the Reports directory and Graphs to the Graphs directory!!")
 
 elif(val == '2'):
-    print("\n\nRunning Experiment 2...")
+    print("\nRunning Experiment 2...")
     Exp2_Script.RunExp(root)
     print("\nExperiment finished! Results written to the Reports directory and Graphs to the Graphs directory!!")
 
 elif(val == '3'):
-    print("\n\nRunning Experiment 1...")
+    print("\nRunning Experiment 1...")
     Exp1_Script.RunExp(root)
 
     print("\n--------------------------------------------------------------------------\n")
