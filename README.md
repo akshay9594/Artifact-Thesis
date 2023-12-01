@@ -1,5 +1,6 @@
 # Artifact Description for the Evaluation of Subscripted Subscript Analysis
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10223264.svg)](https://doi.org/10.5281/zenodo.10223264)
 
 This README describes how to evaluate the artifact for Chapter 3 of the PhD thesis: 
 "Compile-time Automatic Parallelization of Subscripted Subscripts using Recurrence Analysis".
