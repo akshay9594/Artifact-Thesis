@@ -1,6 +1,6 @@
 # Artifact Description for the Evaluation of Subscripted Subscript Analysis
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10223265.svg)](https://doi.org/10.5281/zenodo.10223265)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10239883.svg)](https://doi.org/10.5281/zenodo.10239883)
 
 
 This README describes how to evaluate the artifact for Chapter 3 of the PhD thesis: 
