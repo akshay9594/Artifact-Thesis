@@ -1,7 +1,5 @@
 # Artifact Description for the Evaluation of Subscripted Subscript Analysis
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10239883.svg)](https://doi.org/10.5281/zenodo.10239883)
-
 
 This README describes how to evaluate the artifact for Chapter 3 of the PhD thesis: 
 "Compile-time Automatic Parallelization of Subscripted Subscripts using Recurrence Analysis".
@@ -65,9 +63,7 @@ Note:
 - The codes can be obtained from the Zenodo repository using the DOI above or from Github:
   https://github.com/akshay9594/Artifact-Thesis.git
 
-- A zipped folder is downloaded. 
-
-- Unzip the folder and place it in the root directory of your system.
+- A zipped folder is downloaded. Unzip the folder.
 
 ## Code description
 - The source code files for each experiment are placed in the directories -- *Experiment_1*

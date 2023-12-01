@@ -190,6 +190,7 @@ def run_poly_benchmark(Exp2_directory,benchmark,path_to_reports_dir):
     baseline_path = Exp2_directory + benchmark + '/Serial/'
 
     #Set the path of the optimized codes
+    Base_Opt_code_path = Exp2_directory + benchmark + '/Techniques_Applied/Base_Technique/'
 
     New_Opt_code_path = Exp2_directory + benchmark + '/Techniques_Applied/New_Technique/'
 
@@ -200,6 +201,7 @@ def run_poly_benchmark(Exp2_directory,benchmark,path_to_reports_dir):
     serial_executable = baseline_path + benchmark
 
     #Path to Opt executables
+    Base_Opt_executable = Base_Opt_code_path + benchmark
 
     New_Opt_executable = New_Opt_code_path + benchmark
 
@@ -207,6 +209,7 @@ def run_poly_benchmark(Exp2_directory,benchmark,path_to_reports_dir):
     compile_poly(baseline_path)
 
     #Compile the optimized code
+    compile_poly(Base_Opt_code_path)
 
     compile_poly(New_Opt_code_path)
 
@@ -225,7 +228,14 @@ def run_poly_benchmark(Exp2_directory,benchmark,path_to_reports_dir):
 
         app_time,app_time_var = execute_poly(exec_script,serial_executable)
 
-        f.write("->Baseline execution time="+ str(app_time)+" s " + "(" + str(app_time_var)+" % variation)\n")
+        f.write("->Baseline execution time="+ str(app_time)+" s " + "(" + str(app_time_var)+" % variation)\n\n")
+
+        baseOptCode_time, baseOptCode_var = execute_poly(exec_script,Base_Opt_executable)
+
+        f.write("Execution time of code with Base Technique of [5] ="+ str(baseOptCode_time)+" s " + "(" + str(baseOptCode_var)+" % variation)\n")
+
+        Base_Tech_speedup = app_time/baseOptCode_time
+        f.write("->Base Technique Speedup="+str(Base_Tech_speedup)+"\n\n")
 
         NewOptCode_time, NewOptCode_var = execute_poly(exec_script,New_Opt_executable)
 
@@ -240,11 +250,13 @@ def run_poly_benchmark(Exp2_directory,benchmark,path_to_reports_dir):
     os.chdir(baseline_path)
     Popen(['make','clean'],stdout=PIPE,stderr=PIPE)
 
+    os.chdir(Base_Opt_code_path)
+    Popen(['make','clean'],stdout=PIPE,stderr=PIPE)
 
     os.chdir(New_Opt_code_path)
     Popen(['make','clean'],stdout=PIPE,stderr=PIPE)
     
-    return New_Tech_speedup
+    return (Base_Tech_speedup,New_Tech_speedup)
 
 
 #Running the NAS benchmarks
@@ -284,11 +296,20 @@ def run_NAS_benchmark(Exp2_directory,benchmark,iters,path_to_reports_dir,cl,exec
            
 
         #Set the path of the optimized codes
+        Base_Opt_code_path = Exp2_directory+'/'+ benchmark +'-NAS/Techniques_Applied/Base_Technique'
 
         New_Opt_code_path = Exp2_directory+'/'+ benchmark +'-NAS/Techniques_Applied/New_Technique'
 
         #Compile and execute the optimized code
+        compile_NAS('opt',Base_Opt_code_path,benchmark,cl)
         compile_NAS('opt',New_Opt_code_path,benchmark,cl)
+
+        baseOptCode_time, baseOptCode_var = execute_NAS(Base_Opt_code_path,exec_command,benchmark,iters)
+
+        f.write("Execution time of code with Base Technique of [5] ="+ str(baseOptCode_time)+" s " + "(" + str(baseOptCode_var)+" % variation)\n")
+
+        Base_Tech_speedup = app_time/baseOptCode_time
+        f.write("->Base Technique Speedup="+str(Base_Tech_speedup)+"\n\n")
 
         #Third, determine execution time and speedup of the Cetus parallel code with the New Technique of this paper applied
         NewOptCode_time, NewOptCode_var = execute_NAS(New_Opt_code_path,exec_command,benchmark,iters)
@@ -304,12 +325,14 @@ def run_NAS_benchmark(Exp2_directory,benchmark,iters,path_to_reports_dir,cl,exec
     os.chdir(base_path)
     Popen(['make','clean'],stdout=PIPE,stderr=PIPE)
 
+    os.chdir(Base_Opt_code_path)
+    Popen(['make','clean'],stdout=PIPE,stderr=PIPE)
 
     os.chdir(New_Opt_code_path)
     Popen(['make','clean'],stdout=PIPE,stderr=PIPE)
         
 
-    return New_Tech_speedup
+    return Base_Tech_speedup,New_Tech_speedup
 
 
 
@@ -323,7 +346,8 @@ def run_Other_Benchmark(benchmark,Exp2_directory,iters,path_to_reports_dir,execu
     #Set the path of the baseline codes
     base_path = Exp2_directory + benchmark + '/Serial/'
 
-    #Set the path of the optimized codes (Cetusparallel code with New Technique applied)
+    #Set the path of the optimized codes (Cetusparallel code with Base Technique and New Technique applied)
+    Base_Technique_applied_path = Exp2_directory+ benchmark +'/Techniques_Applied/Base_Technique/'
 
     New_Technique_applied_path = Exp2_directory+ benchmark +'/Techniques_Applied/New_Technique/'
 
@@ -331,6 +355,7 @@ def run_Other_Benchmark(benchmark,Exp2_directory,iters,path_to_reports_dir,execu
     compile_Other_Benchmark(base_path)
 
     #Compile the optimized codes
+    compile_Other_Benchmark(Base_Technique_applied_path)
 
     compile_Other_Benchmark(New_Technique_applied_path)
 
@@ -353,8 +378,15 @@ def run_Other_Benchmark(benchmark,Exp2_directory,iters,path_to_reports_dir,execu
        
         app_time, app_time_var = execute_Other_Benchmark(base_path,input_path,iters,executable)
 
-        f.write("->Baseline execution time ="+ str(app_time)+" s " + "(" + str(app_time_var)+" % variation)\n")
+        f.write("->Baseline execution time ="+ str(app_time)+" s " + "(" + str(app_time_var)+" % variation)\n\n")
             
+        #Second, determine execution time and speedup of the Cetus parallel code with the Base Technique of [5] applied
+        baseOptCode_time, baseOptCode_var = execute_Other_Benchmark(Base_Technique_applied_path,input_path,iters,executable)
+
+        f.write("Execution time of code with Base Technique of [5] ="+ str(baseOptCode_time)+" s " + "(" + str(baseOptCode_var)+" % variation)\n")
+
+        Base_Tech_speedup = app_time/baseOptCode_time
+        f.write("->Base Technique Speedup="+str(Base_Tech_speedup)+"\n\n")
 
         #Third, determine execution time and speedup of the Cetus parallel code with the New Technique of this paper applied
         NewOptCode_time, NewOptCode_var = execute_Other_Benchmark(New_Technique_applied_path,input_path,iters,executable)
@@ -370,18 +402,20 @@ def run_Other_Benchmark(benchmark,Exp2_directory,iters,path_to_reports_dir,execu
     os.chdir(base_path)
     Popen(['make','clean'],stdout=PIPE,stderr=PIPE)
 
+    os.chdir(Base_Technique_applied_path)
+    Popen(['make','clean'],stdout=PIPE,stderr=PIPE)
 
     os.chdir(New_Technique_applied_path)
     Popen(['make','clean'],stdout=PIPE,stderr=PIPE)
 
     
-    return New_Tech_speedup
+    return Base_Tech_speedup,New_Tech_speedup
 
 
 
 
 #CHOLMOD Supernodal within SuiteSparse handled separately
-def run_SuiteSparse(benchmark,Exp2_directory,iters,path_to_reports_dir,executable,path_to_input):
+def run_SuiteSparse(benchmark,Exp2_directory,root_directory,iters,path_to_reports_dir,executable,path_to_input):
 
     #If the user wants to run the experiment for all the input files
 
@@ -404,8 +438,10 @@ def run_SuiteSparse(benchmark,Exp2_directory,iters,path_to_reports_dir,executabl
     file = 'cholmod_super_numeric.c'
     #Path to baselin and optimized cholmod_super_numeric files
     Baseline_file_direc = Supernodal_path + 'Baseline/'
+    BaseTech_CetusOut_file_direc = Supernodal_path + 'BaseTech/'
     NewTech_CetusOut_file_direc = Supernodal_path + 'NewTech/'
 
+    utils.set_path_to_BLAS_LAPACK(root_directory,SuiteSparse_path)
     #Compile and run the baseline code
 
     with open(path_to_reports_dir+'/'+benchmark+'.txt', 'w') as f:
@@ -419,7 +455,21 @@ def run_SuiteSparse(benchmark,Exp2_directory,iters,path_to_reports_dir,executabl
         time_baseline,percent_var = Compile_And_Execute_CHOLMOD(base_path,Supernodal_path,Baseline_file_direc,  
                                                                 file,path_to_input,iters,executable)
 
-        f.write("->Baseline execution time ="+ str(time_baseline)+" s " + "(" + str(percent_var)+" % variation)\n")
+        f.write("->Baseline execution time ="+ str(time_baseline)+" s " + "(" + str(percent_var)+" % variation)\n\n")
+
+        #Clean the object files
+        os.chdir(base_path)
+        Popen(['make','clean'],stdout=PIPE,stderr=PIPE)
+
+        #Second, determine execution time and speedup of the Cetus parallel code with the Base Technique of [5] applied
+        time_BaseTech,percent_var =    Compile_And_Execute_CHOLMOD(base_path,Supernodal_path,BaseTech_CetusOut_file_direc,
+                                    file,path_to_input,iters,executable)
+        
+        f.write("Execution time of code with Base Technique of [5] ="+ str(time_BaseTech)+" s " + "(" + str(percent_var)+" % variation)\n")
+
+        Base_Tech_speedup = time_baseline/time_BaseTech
+        f.write("->Base Technique Speedup="+str(Base_Tech_speedup)+"\n\n")
+
 
         #Clean the object files
         os.chdir(base_path)
@@ -450,7 +500,7 @@ def run_SuiteSparse(benchmark,Exp2_directory,iters,path_to_reports_dir,executabl
     os.chdir(base_path+"Demo/")
     Popen(['make','purge'],stdout=PIPE,stderr=PIPE)
 
-    return New_Tech_speedup
+    return Base_Tech_speedup,New_Tech_speedup
 
 
 
@@ -464,9 +514,9 @@ def drive_poly(Exp2_directory,root_directory,path_to_reports_dir,list_benchmarks
         print("For Benchmark:", benchmark)
 
         #Actual subroutine that executes the benchmark
-        NewTech_Speedup = run_poly_benchmark(Exp2_directory,benchmark,path_to_reports_dir)
+        BaseTech_Speedup,NewTech_Speedup = run_poly_benchmark(Exp2_directory,benchmark,path_to_reports_dir)
 
-        speedup_dict[benchmark] = NewTech_Speedup
+        speedup_dict[benchmark] = (BaseTech_Speedup,NewTech_Speedup)
         
         os.chdir(root_directory)
 
@@ -499,12 +549,12 @@ def drive_NAS(Exp2_directory,root_directory,path_to_reports_dir,iters,list_bench
             return
 
         #Actual subroutine that executes the benchmark
-        New_Tech_speedup = run_NAS_benchmark(Exp2_directory,benchmark,iters,path_to_reports_dir,input_class,executable)
+        Base_Tech_speedup,New_Tech_speedup = run_NAS_benchmark(Exp2_directory,benchmark,iters,path_to_reports_dir,input_class,executable)
 
         if(benchmark == 'UA'):
-            speedup_dict[benchmark + '(transf)'] = New_Tech_speedup
+            speedup_dict[benchmark + '(transf)'] = (Base_Tech_speedup,New_Tech_speedup)
         else:
-            speedup_dict[benchmark] = New_Tech_speedup
+            speedup_dict[benchmark] = (Base_Tech_speedup,New_Tech_speedup)
         
         os.chdir(root_directory)
 
@@ -536,19 +586,21 @@ def drive_Other(Exp2_directory,root_directory,path_to_reports_dir,iters,list_ben
             executable = 'cholmod_demo'
             input_mat = 'spal_004'
             path_to_input = os.getcwd() + '/input_matrices/' + input_mat + '/' + input_mat + '.mtx'
-            New_Tech_speedup = run_SuiteSparse(benchmark,Exp2_directory,iters,path_to_reports_dir,executable,path_to_input)
+
+            Base_Tech_speedup,New_Tech_speedup = run_SuiteSparse(benchmark,Exp2_directory,root_directory,iters,
+                                                                 path_to_reports_dir,executable,path_to_input)
             benchmark_name = 'CHOLMOD\nSupernodal'
-            speedup_dict[benchmark_name] = New_Tech_speedup
+            speedup_dict[benchmark_name] = (Base_Tech_speedup,New_Tech_speedup)
             os.chdir(root_directory)
             continue
         
 
-        New_Tech_speedup = run_Other_Benchmark(benchmark,Exp2_directory,iters,path_to_reports_dir,executable,path_to_input)
+        Base_Tech_speedup,New_Tech_speedup = run_Other_Benchmark(benchmark,Exp2_directory,iters,path_to_reports_dir,executable,path_to_input)
 
         if(benchmark == 'ic0_csc'):
           benchmark = 'Incomplete\nCholesky' 
 
-        speedup_dict[benchmark] = New_Tech_speedup
+        speedup_dict[benchmark] = (Base_Tech_speedup,New_Tech_speedup)
 
         os.chdir(root_directory)
 
@@ -570,7 +622,7 @@ def RunExp(root_directory):
     #Grouping helps in seamleass compilation and execution.
     benchmarks_dict = {'poly':['fdtd-2d','heat-3d', 'gramschmidt', 'syrk'],
                         'NAS':['CG', 'MG', 'UA', 'IS'], 'Other':['SDDMM','ic0_csc','amgmk','SuiteSparse']}
-  
+
 
     benchmark_tags = list(benchmarks_dict.keys())
 
@@ -588,7 +640,7 @@ def RunExp(root_directory):
     
     #Plot the speedups. Graph saved in the Graphs/Exp-2 directory. 
 
-    plot_title = "Performance impact of the New Array Analysis algorithm"
+    plot_title = "Performance comparsion of the technique of [5] (Base Algo) and the New Technique (New Algo)"
 
     path_to_graphs_dir = root_directory + '/Graphs/Exp-2/'
 

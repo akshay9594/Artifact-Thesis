@@ -426,6 +426,8 @@ def run_SuiteSparse(benchmark,Exp1_directory,root_directory,iters,path_to_report
     benchmark_name = 'CHOLMOD\nSupernodal'
     speedup_dict = {}
 
+    utils.set_path_to_BLAS_LAPACK(root_directory,SuiteSparse_path)
+
     #Compile and run the baseline code
     with open(path_to_reports_dir+'/'+benchmark+'.txt', 'w') as f:
         f.write(head_String)
